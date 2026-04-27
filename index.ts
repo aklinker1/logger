@@ -2,13 +2,25 @@ import { inspect } from "node:util";
 
 import { serializeError } from "serialize-error";
 
+/**
+ * Numeric log levels used to control verbosity. Higher values are more verbose.
+ * The active level is determined by the `LOG_LEVEL` environment variable (defaults to {@link LogLevel.Info}).
+ * Messages are only output when their level is less than or equal to the active level.
+ */
 export enum LogLevel {
+  /** Suppresses all log output. */
   Silent = 1,
+  /** Unrecoverable errors that cause the process to exit. */
   Fatal = 2,
+  /** Errors that do not necessarily require the process to exit. */
   Error = 3,
+  /** Potentially harmful situations worth investigating. */
   Warn = 4,
+  /** Confirmation that an operation completed successfully. */
   Success = 5,
+  /** General informational messages. This is the default level. */
   Info = 6,
+  /** Verbose diagnostic information useful during development. */
   Debug = 7,
 }
 
@@ -26,8 +38,17 @@ const logLevel =
   // @ts-expect-error: Works when LOG_LEVEL is undefined
   Number(ENV_LEVELS[globalThis.process?.env?.LOG_LEVEL]) || LogLevel.Info;
 
+/**
+ * Output format for log messages.
+ *
+ * Determined by the `LOG_FORMAT` environment variable (`"json"` or `"pretty"`).
+ * When not set, defaults to {@link LogFormat.Json} in production (`NODE_ENV === "production"`)
+ * and {@link LogFormat.Pretty} otherwise.
+ */
 export enum LogFormat {
+  /** Human-readable, colorized output for terminal use. */
   Pretty,
+  /** Structured JSON output suitable for log aggregation systems. */
   Json,
 }
 const logFormat = globalThis.process?.env?.LOG_FORMAT
@@ -38,6 +59,15 @@ const logFormat = globalThis.process?.env?.LOG_FORMAT
     ? LogFormat.Json
     : LogFormat.Pretty;
 
+/**
+ * A function responsible for writing a single log entry.
+ *
+ * @param log - The underlying logging function (e.g. `console.log`).
+ * @param level - The severity level of the message.
+ * @param namespace - The colon-delimited namespace of the logger.
+ * @param message - The log message text.
+ * @param meta - Optional key/value metadata to include with the message.
+ */
 export type Formatter = (
   log: (...args: any[]) => void,
   level: LogLevel,
@@ -77,13 +107,24 @@ function createPrettyFormatter(): Formatter {
     [LogLevel.Silent]: " ",
   };
 
-  const namespaceColors: string[] = [GREY, RED, YELLOW, BLUE, GREEN, CYAN, MAGENTA];
+  const namespaceColors: string[] = [
+    GREY,
+    RED,
+    YELLOW,
+    BLUE,
+    GREEN,
+    CYAN,
+    MAGENTA,
+  ];
 
   return (log, level, namespace, message, meta) => {
     const args: unknown[] = [
       `${colors[level]}${symbols[level]}${RESET}`,
       `${DIM}${
-        namespaceColors[namespace.slice(0, namespace.indexOf(":")).length % namespaceColors.length]
+        namespaceColors[
+          namespace.slice(0, namespace.indexOf(":")).length %
+            namespaceColors.length
+        ]
       }${namespace}${RESET}`,
       message,
     ];
@@ -118,19 +159,75 @@ function createJsonFormatter(): Formatter {
     );
 }
 
-const formatter = logFormat === LogFormat.Json ? createJsonFormatter() : createPrettyFormatter();
+const formatter =
+  logFormat === LogFormat.Json
+    ? createJsonFormatter()
+    : createPrettyFormatter();
 
+/** A structured logger that supports multiple severity levels, namespacing, and metadata. */
 export interface Logger {
+  /**
+   * Log a fatal message and terminate the process with exit code 1.
+   * @param message - The log message.
+   * @param meta - Optional metadata to attach to the log entry.
+   */
   fatal(message: string, meta?: Record<string, unknown>): never;
+  /**
+   * Log an error message.
+   * @param message - The log message.
+   * @param meta - Optional metadata to attach to the log entry.
+   */
   error(message: string, meta?: Record<string, unknown>): void;
+  /**
+   * Log a warning message.
+   * @param message - The log message.
+   * @param meta - Optional metadata to attach to the log entry.
+   */
   warn(message: string, meta?: Record<string, unknown>): void;
+  /**
+   * Log a success message.
+   * @param message - The log message.
+   * @param meta - Optional metadata to attach to the log entry.
+   */
   success(message: string, meta?: Record<string, unknown>): void;
+  /**
+   * Log an informational message.
+   * @param message - The log message.
+   * @param meta - Optional metadata to attach to the log entry.
+   */
   info(message: string, meta?: Record<string, unknown>): void;
+  /**
+   * Log a debug message.
+   * @param message - The log message.
+   * @param meta - Optional metadata to attach to the log entry.
+   */
   debug(message: string, meta?: Record<string, unknown>): void;
+  /** Print a blank line. Only produces output when the log format is {@link LogFormat.Pretty}. */
   blank(): void;
+  /**
+   * Create a child logger with an extended namespace.
+   * The child's namespace is formed by appending `:<namespace>` to the parent's namespace.
+   * @param namespace - The namespace segment to append.
+   * @returns A new {@link Logger} with the extended namespace.
+   */
   extend(namespace: string): Logger;
 }
 
+/**
+ * Create a new {@link Logger} instance with the given namespace.
+ *
+ * @example
+ * ```ts
+ * const logger = createLogger("app");
+ * logger.info("Server started", { port: 3000 });
+ *
+ * const dbLogger = logger.extend("db");
+ * dbLogger.debug("Query executed");
+ * ```
+ *
+ * @param namespace - A label that identifies the source of log messages (e.g. `"app"`, `"http"`).
+ * @returns A {@link Logger} bound to the given namespace.
+ */
 export function createLogger(namespace: string): Logger {
   return {
     debug(message, meta) {
