@@ -9,4 +9,34 @@
 
 Personalized logger for backends.
 
+![Preview](https://raw.githubusercontent.com/aklinker1/logger/refs/heads/main/.github/preview.png)
+
 </div>
+
+```sh
+bun add @aklinker1/logger
+```
+
+## Usage
+
+```ts
+import { createLogger } from '@aklinker1/logger'
+
+const logger = createLogger("namespace");
+logger.info("message", { params: any })
+```
+
+### Log Level
+
+Set the `LOG_LEVEL` env var equal to the minimum level you want to see:
+
+```sh
+LOG_LEVEL=warn my-script
+```
+
+### Log Format
+
+There are two log formatters:
+
+- **Pretty** (`LOG_FORMAT=pretty`): Default for development
+- **JSON** (`LOG_FORMAT=json`): Default in production environments where `NODE_ENV=production`
