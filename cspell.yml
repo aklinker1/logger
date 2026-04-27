@@ -1,0 +1,8 @@
+ignorePaths:
+  - dist
+words:
+  - aklinker
+  - klinker
+  - oxlint
+  - oxfmt
+  - bunx
