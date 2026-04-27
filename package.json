@@ -1,7 +1,6 @@
 {
   "name": "@aklinker1/logger",
   "version": "1.0.0",
-  "private": true,
   "description": "Personalized logger for backends",
   "keywords": [
     "logger"
