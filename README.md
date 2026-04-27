@@ -20,10 +20,10 @@ bun add @aklinker1/logger
 ## Usage
 
 ```ts
-import { createLogger } from '@aklinker1/logger'
+import { createLogger } from "@aklinker1/logger";
 
 const logger = createLogger("namespace");
-logger.info("message", { params: any })
+logger.info("message", { params: any });
 ```
 
 ### Log Level

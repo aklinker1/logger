@@ -1,4 +1,5 @@
 import { inspect } from "node:util";
+
 import { serializeError } from "serialize-error";
 
 export enum LogLevel {
@@ -76,24 +77,13 @@ function createPrettyFormatter(): Formatter {
     [LogLevel.Silent]: " ",
   };
 
-  const namespaceColors: string[] = [
-    GREY,
-    RED,
-    YELLOW,
-    BLUE,
-    GREEN,
-    CYAN,
-    MAGENTA,
-  ];
+  const namespaceColors: string[] = [GREY, RED, YELLOW, BLUE, GREEN, CYAN, MAGENTA];
 
   return (log, level, namespace, message, meta) => {
     const args: unknown[] = [
       `${colors[level]}${symbols[level]}${RESET}`,
       `${DIM}${
-        namespaceColors[
-          namespace.slice(0, namespace.indexOf(":")).length %
-            namespaceColors.length
-        ]
+        namespaceColors[namespace.slice(0, namespace.indexOf(":")).length % namespaceColors.length]
       }${namespace}${RESET}`,
       message,
     ];
@@ -128,10 +118,7 @@ function createJsonFormatter(): Formatter {
     );
 }
 
-const formatter =
-  logFormat === LogFormat.Json
-    ? createJsonFormatter()
-    : createPrettyFormatter();
+const formatter = logFormat === LogFormat.Json ? createJsonFormatter() : createPrettyFormatter();
 
 export interface Logger {
   fatal(message: string, meta?: Record<string, unknown>): never;
