@@ -3,13 +3,13 @@ name: Publish
 on:
   workflow_dispatch:
     inputs:
+      bump:
+        description: Blank (auto), a version (1.4.1), or major/minor/patch
+        type: string
       dryRun:
         description: Dry Run?
         type: boolean
         default: false
-      bump:
-        description: Blank (auto), a version (1.4.1), or major/minor/patch
-        type: string
 
 jobs:
   validate:
