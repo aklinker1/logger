@@ -1,6 +1,6 @@
 import { inspect } from "node:util";
 
-import { serializeError } from "serialize-error";
+const isProduction = globalThis.process?.env?.NODE_ENV === "production";
 
 /**
  * Numeric log levels used to control verbosity. Higher values are more verbose.
@@ -137,11 +137,11 @@ function createJsonFormatter(): Formatter {
   return (log, level, namespace, message, meta) =>
     log(
       JSON.stringify(
-        serializeError({
+        toJson({
           level: levelNames[level],
           namespace,
           message,
-          time: new Date().toISOString(),
+          time: new Date(),
           ...meta,
         }),
       ),
@@ -248,4 +248,41 @@ export function createLogger(namespace: string): Logger {
       return createLogger(`${namespace}:${childNamespace}`);
     },
   };
+}
+
+function toJson(obj: unknown): any {
+  if (obj == null) return obj;
+
+  if (obj instanceof Date) return obj.toISOString();
+  if (obj instanceof Map)
+    return Object.fromEntries(obj.entries().map((entry) => [entry[0], toJson(entry[1])]));
+  if (obj instanceof Set) return Array.from(obj).map(toJson);
+
+  if (obj instanceof Error)
+    return {
+      // Not included when spreading object...
+
+      // @ts-expect-error: Not always overridden by the spread
+      name: obj.name,
+      // @ts-expect-error: Not always overridden by the spread
+      message: obj.message,
+      ...(obj.cause && toJson(obj.cause)),
+      ...(isProduction && { stack: obj.stack }),
+
+      // Any custom properties set on the class will be included here
+      ...obj,
+    };
+
+  switch (typeof obj) {
+    case "number":
+    case "boolean":
+    case "string":
+      return obj;
+    case "object":
+      return Array.isArray(obj)
+        ? obj.map(toJson)
+        : Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, toJson(v)]));
+  }
+
+  return obj.toString();
 }
