@@ -29,7 +29,7 @@
     "build": "tsdown index.ts --dts.tsgo",
     "test": "bun test",
     "test:watch": "bun test --watch",
-    "prepare": "simple-git-hooks",
+    "prepare": "./node_modules/.bin/simple-git-hooks",
     "prepack": "bun run build"
   },
   "devDependencies": {
