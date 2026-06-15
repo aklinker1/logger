@@ -118,10 +118,14 @@ function createPrettyFormatter(): Formatter {
       message,
     ];
     if (meta)
-      args.push(DIM + inspect(meta, {
-        colors: true,
-        breakLength: process.stdout.getWindowSize()[0] 
-      }) + RESET);
+      args.push(
+        DIM +
+          inspect(meta, {
+            colors: true,
+            breakLength: process.stdout.getWindowSize()[0],
+          }) +
+          RESET,
+      );
 
     log(...args);
   };
