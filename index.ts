@@ -148,7 +148,7 @@ function createJsonFormatter(): Formatter {
         toJson({
           level: levelNames[level],
           namespace,
-          message,
+          message: stripEsc(message),
           time: new Date(),
           ...meta,
         }),
@@ -293,4 +293,11 @@ function toJson(obj: unknown): any {
   }
 
   return obj.toString();
+}
+
+// oxlint-disable-next-line no-control-regex
+const ESC_REGEX = /\x1b\[\d+m/g;
+
+function stripEsc(str: string): string {
+  return str.replace(ESC_REGEX, "");
 }

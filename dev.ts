@@ -4,7 +4,7 @@ const logger = createLogger("dev");
 
 logger.blank();
 
-logger.debug("This is a debug log");
+logger.debug("This is a \x1b[31mdebug\x1b[0m log");
 logger.info("This is an info log");
 logger.success("This is an success log");
 logger.warn("This is an warn log");
