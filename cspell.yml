@@ -1,5 +1,7 @@
 ignorePaths:
   - dist
+ignoreWords:
+  - mdebug
 words:
   - aklinker
   - klinker
