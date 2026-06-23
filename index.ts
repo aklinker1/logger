@@ -122,7 +122,7 @@ function createPrettyFormatter(): Formatter {
         DIM +
           inspect(meta, {
             colors: true,
-            breakLength: process.stdout.getWindowSize()[0],
+            breakLength: process.stdout.getWindowSize?.()?.[0],
           }) +
           RESET,
       );
