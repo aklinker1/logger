@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.1.1
+
+[compare changes](https://github.com/aklinker1/logger/compare/v1.1.0...v1.1.1)
+
+### 🩹 Fixes
+
+- Don't error in non-TTY environments
+
+### ❤️ Contributors
+
+- Aaron <aaronklinker1@gmail.com>
+
 ## v1.1.0
 
 [compare changes](https://github.com/aklinker1/logger/compare/v1.0.7...v1.1.0)
